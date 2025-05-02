@@ -1,0 +1,37 @@
+
+# ignore all logs
+**/logs
+*.log
+
+# ignore all git folders inside project
+**/.git
+
+
+# ignore volumes
+**/.container_data/
+**/container_logs/
+**/.nginx/configs/cache/
+
+# ignore all vscode-settings
+**/.vscode
+
+# protected files
+*.env.yml
+*.env
+**/userlist.txt
+
+# ignore all keys
+*.cnf
+*.pem
+*.srl
+
+**/certs
+
+*.log
+*.exe
+
+*/dist
+/docs/swagger.json
+/docs/docs.go
+**/dev_config.yml
+cover.out

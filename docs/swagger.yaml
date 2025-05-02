@@ -1,0 +1,894 @@
+basePath: /api/dishes-service-backend
+definitions:
+  domain.AddCategoryRequest:
+    properties:
+      name:
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  domain.AddDishRequest:
+    properties:
+      categories:
+        items:
+          type: integer
+        type: array
+      description:
+        maxLength: 256
+        type: string
+      image:
+        items:
+          type: integer
+        type: array
+      name:
+        minLength: 1
+        type: string
+      price:
+        minimum: 800
+        type: integer
+      restaurantId:
+        type: integer
+    required:
+    - name
+    - restaurantId
+    type: object
+  domain.AddDishResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.AddRestaurantRequest:
+    properties:
+      name:
+        minLength: 1
+        type: string
+    required:
+    - name
+    type: object
+  domain.DeleteCategoryRequest:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.DeleteRestaurantRequest:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.Dish:
+    properties:
+      categories:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      restaurantName:
+        type: string
+      url:
+        type: string
+    type: object
+  domain.DishCategory:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.EditDishRequest:
+    properties:
+      categories:
+        items:
+          type: integer
+        type: array
+      description:
+        maxLength: 256
+        type: string
+      id:
+        type: integer
+      image:
+        items:
+          type: integer
+        type: array
+      name:
+        minLength: 1
+        type: string
+      price:
+        minimum: 800
+        type: integer
+      restaurantId:
+        type: integer
+    required:
+    - id
+    - name
+    - restaurantId
+    type: object
+  domain.GetDishesCategory:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.GetDishesRestaurant:
+    properties:
+      id:
+        type: integer
+    type: object
+  domain.LoginByTelegramRequest:
+    properties:
+      initTelegramData:
+        type: string
+    type: object
+  domain.LoginResponse:
+    properties:
+      accessToken:
+        $ref: '#/definitions/jwt.TokenResponse'
+      refreshToken:
+        $ref: '#/definitions/jwt.TokenResponse'
+    type: object
+  domain.OrderItem:
+    properties:
+      count:
+        type: integer
+      dishId:
+        type: integer
+      name:
+        type: string
+      price:
+        type: integer
+      status:
+        type: string
+      totalPrice:
+        type: integer
+    type: object
+  domain.ProcessOrderRequest:
+    properties:
+      items:
+        additionalProperties:
+          type: integer
+        type: object
+      paymentMethod:
+        minLength: 1
+        type: string
+      wishes:
+        type: string
+    required:
+    - items
+    - paymentMethod
+    type: object
+  domain.ProcessOrderResponse:
+    properties:
+      paymentUrl:
+        description: for some payment methods may be empty
+        type: string
+    type: object
+  domain.RenameCategoryRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  domain.RenameRestaurantRequest:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  domain.Restaurant:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.UserOrder:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/domain.OrderItem'
+        type: array
+      paymentMethod:
+        type: string
+      status:
+        type: string
+      total:
+        type: integer
+      wishes:
+        type: string
+    type: object
+  domain.UserRoleResponse:
+    properties:
+      roleName:
+        type: string
+    type: object
+  github_com_Falokut_go-kit_http_apierrors.Error:
+    properties:
+      details:
+        additionalProperties: {}
+        type: object
+      errorCode:
+        type: integer
+      errorMessage:
+        type: string
+    type: object
+  jwt.TokenResponse:
+    properties:
+      expiresAt:
+        type: string
+      token:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Сервис для заказа еды
+  title: dishes-service-backend
+  version: 1.0.0
+paths:
+  /auth/access_token:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/jwt.TokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Обновить токен доступа
+      tags:
+      - auth
+  /auth/login_by_telegram:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: тело запроса
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginByTelegramRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.LoginResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Войти в аккаунт
+      tags:
+      - auth
+  /auth/user_role:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserRoleResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Получить роль пользователя
+      tags:
+      - auth
+  /dishes:
+    get:
+      description: возвращает список блюд
+      parameters:
+      - description: список идентификаторов блюд через запятую
+        in: query
+        name: ids
+        type: string
+      - description: список идентификаторов категорий через запятую
+        in: query
+        name: сategories
+        type: string
+      - description: максимальное количество блюд
+        in: query
+        name: limit
+        type: integer
+      - description: смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Dish'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: dish
+      tags:
+      - dishes
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddDishRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AddDishResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Add Dish
+      tags:
+      - dishes
+  /dishes/all_categories:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.DishCategory'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Получить все категории
+      tags:
+      - dishes_categories
+  /dishes/categories:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.DishCategory'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Получить категории блюд
+      tags:
+      - dishes_categories
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DishCategory'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Создать категорию
+      tags:
+      - dishes_categories
+  /dishes/categories/{id}:
+    delete:
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.DeleteCategoryRequest'
+      - description: Идентификатор категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Удалить категорию
+      tags:
+      - dishes_categories
+    get:
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.GetDishesCategory'
+      - description: Идентификатор категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.DishCategory'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Получить категорию
+      tags:
+      - dishes_categories
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Идентификатор категории
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RenameCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Переименовать категорию
+      tags:
+      - dishes_categories
+  /dishes/delete/{id}:
+    delete:
+      parameters:
+      - description: идентификатор блюда
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Delete Dish
+      tags:
+      - dishes
+  /dishes/edit/{id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.EditDishRequest'
+      - description: идентификатор блюда
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Edit Dish
+      tags:
+      - dishes
+  /orders:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ProcessOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ProcessOrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Заказать
+      tags:
+      - order
+  /orders/my:
+    get:
+      parameters:
+      - description: максимальное количество блюд
+        in: query
+        name: limit
+        type: integer
+      - description: смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserOrder'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Получить заказы
+      tags:
+      - order
+  /restaurants:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Restaurant'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Получить все рестораны
+      tags:
+      - restaurants
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.AddRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Создать ресторан
+      tags:
+      - restaurants
+  /restaurants/{id}:
+    delete:
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.DeleteRestaurantRequest'
+      - description: Идентификатор ресторана
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      security:
+      - Bearer: []
+      summary: Удалить ресторан
+      tags:
+      - restaurants
+    get:
+      parameters:
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.GetDishesRestaurant'
+      - description: Идентификатор ресторана
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Restaurant'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Получить ресторан
+      tags:
+      - restaurants
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Идентификатор ресторана
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RenameRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Falokut_go-kit_http_apierrors.Error'
+      summary: Переименовать ресторан
+      tags:
+      - restaurants
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

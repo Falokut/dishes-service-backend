@@ -1,0 +1,35 @@
+{
+  "logLevel": "debug",
+  "images": {
+    "baseServiceUrl": "https://{host:port}/api/images-storage-service/",
+    "baseImagePath": "https://{{host:port}}/image"
+  },
+  "db": {
+    "schema": "dish_as_a_service",
+    "host": "{{ db_host}}",
+    "port": 5432,
+    "database": "{{ db_name }}",
+    "username": "{{ db_username }}",
+    "password": "{{ db_password }}"
+  },
+  "bot": {
+    "timeout": 100,
+    "limit": 1,
+    "paymentToken": "{{ tg_payment_token }}",
+    "token": "{{ tg_token }}"
+  },
+  "payment": {
+    "expirationDelayMinutes": 30
+  },
+  "auth": {
+    "access": {
+      "ttlHours": 36,
+      "secret": "{{ jwt_access_secret }}"
+    },
+    "refresh": {
+      "ttlHours": 720,
+      "secret": "{{ jwt_refresh_secret }}"
+    },
+    "telegramExpireDurationHours": 24
+  }
+}
