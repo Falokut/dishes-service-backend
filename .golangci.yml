@@ -11,12 +11,10 @@ issues:
     - path: routes
       linters:
         - wrapcheck
-    - path: bot/routes
+    - path: bot/*
       linters:
         - wrapcheck
-    - path: bot/controller
-      linters:
-        - ireturn    
+        - ireturn 
 linters:
   enable-all: true
   disable:
@@ -37,7 +35,6 @@ linters:
     - tagliatelle
     - musttag
     - perfsprint
-    - gomnd
 linters-settings:
   funlen:
     lines: 80

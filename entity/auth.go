@@ -21,6 +21,8 @@ func (t *TokenUserInfo) ToMap() map[string]any {
 		roleNameJwtKey: t.RoleName,
 	}
 }
+
+// nolint:err113
 func (t *TokenUserInfo) FromMap(m map[string]any) error {
 	userId, ok := m[userIdJwtKey]
 	if !ok {

@@ -10,10 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	fileStorageEndpoint = "file"
-)
-
 type File struct {
 	cli     *client.Client
 	baseUrl string
