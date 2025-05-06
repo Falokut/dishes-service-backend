@@ -13,6 +13,7 @@ RUN apk update && apk add wget
 WORKDIR /
 COPY --from=builder  /bin /bin
 COPY /migrations /migrations
+COPY /conf /conf
 
 EXPOSE 8080
 
