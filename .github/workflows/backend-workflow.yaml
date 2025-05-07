@@ -41,7 +41,7 @@ jobs:
 
       - name: Go test
         run: |
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+          go test -race -v -test.short=true -coverpkg=./... -coverprofile=coverage.out -covermode=atomic ./...
           go tool cover -func=coverage.out
 
       - name: Generate HTML coverage report
