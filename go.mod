@@ -3,7 +3,7 @@ module dishes-service-backend
 go 1.24.0
 
 require (
-	github.com/Falokut/go-kit v1.7.0
+	github.com/Falokut/go-kit v1.8.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.4
@@ -44,6 +44,7 @@ require (
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/txix-open/etp/v4 v4.0.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
