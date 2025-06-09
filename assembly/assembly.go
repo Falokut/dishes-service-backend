@@ -20,13 +20,12 @@ import (
 )
 
 type Assembly struct {
-	boot     *bootstrap.Bootstrap
-	db       *dbx.Client
-	tgBot    *tg_botx.Bot
-	bgjobCli *bgjob.Client
-	fileCli  *client.Client
-	server   *http.Server
-	logger   *log.Adapter
+	boot    *bootstrap.Bootstrap
+	db      *dbx.Client
+	tgBot   *tg_botx.Bot
+	fileCli *client.Client
+	server  *http.Server
+	logger  *log.Adapter
 }
 
 func New(boot *bootstrap.Bootstrap) (*Assembly, error) {
@@ -61,16 +60,22 @@ func (a *Assembly) ReceiveConfig(shortCtx context.Context, remoteConfig []byte) 
 		a.boot.Fatal(errors.WithMessage(err, "upgrade db"))
 	}
 
+	pgDb, _ := a.db.DB()
+	bgjobCli := bgjob.NewClient(bgjob.NewPgStore(pgDb.DB.DB))
+
 	err = a.tgBot.UpgradeConfig(shortCtx, newCfg.Bot)
 	if err != nil {
 		a.boot.Fatal(errors.WithMessage(err, "upgrade tg bot config"))
 	}
 	a.fileCli.GlobalRequestConfig().BaseUrl = newCfg.Images.BaseServicePath
 
-	locator := NewLocator(a.db, a.bgjobCli, a.fileCli, a.tgBot, a.logger)
+	locator := NewLocator(a.db, bgjobCli, a.fileCli, a.tgBot, a.logger)
 	cfg, err := locator.LocatorConfig(shortCtx, newCfg)
 	if err != nil {
 		a.boot.Fatal(errors.WithMessage(err, "locator config"))
+	}
+	for _, worker := range cfg.Workers {
+		worker.Run(a.boot.App.Context())
 	}
 
 	a.tgBot.UpgradeMux(shortCtx, cfg.BotRouter)
