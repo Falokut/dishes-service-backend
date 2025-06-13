@@ -197,5 +197,11 @@ func (c Order) HandleCallbackQuery(ctx context.Context, update tg_bot.Update) (t
 			return nil, err
 		}
 	}
-	return nil, nil //nolint:nilnil
+
+	editMarkup := tg_bot.NewEditMessageReplyMarkup(
+		update.CallbackQuery.Message.Chat.Id,
+		update.CallbackQuery.Message.MessageID,
+		tg_bot.NewInlineKeyboardMarkup([]tg_bot.InlineKeyboardButton{}),
+	)
+	return editMarkup, nil
 }
