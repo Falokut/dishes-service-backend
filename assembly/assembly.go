@@ -78,7 +78,7 @@ func (a *Assembly) ReceiveConfig(shortCtx context.Context, remoteConfig []byte) 
 		worker.Run(a.boot.App.Context())
 	}
 
-	a.tgBot.UpgradeMux(shortCtx, cfg.BotRouter)
+	a.tgBot.UpgradeMux(a.boot.App.Context(), cfg.BotRouter)
 	a.server.Upgrade(cfg.HttpRouter)
 	return nil
 }
