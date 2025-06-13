@@ -4,6 +4,7 @@ import (
 	"context"
 	"dishes-service-backend/entity"
 	"fmt"
+	"html"
 	"strings"
 	"time"
 
@@ -54,7 +55,7 @@ func (s UserOrder) NotifySuccessPayment(ctx context.Context, order *entity.Order
 	for _, chatId := range adminIds {
 		message := tg_bot.NewMessage(chatId, orderInfoString)
 		message.ReplyMarkup = markup
-		message.ParseMode = tg_bot.ModeMarkdownV2
+		message.ParseMode = tg_bot.ModeHTML
 		err = s.bot.Send(message)
 		if err != nil {
 			return errors.WithMessagef(err, "send notification to chat: %d", chatId)
@@ -122,48 +123,38 @@ func (s UserOrder) CancelPaidOrder(ctx context.Context, req entity.QueryCallback
 	return nil
 }
 
+// nolint:gosmopolitan,mnd
 func (s UserOrder) getOrderInfoString(order *entity.Order, user *entity.User) string {
-	template := `Заказ №%s
-	Состав заказа: 
-	%v
-	Имя заказавшего: %s
-	Telegram ник заказавшего: @%s
-	Стоимость заказа: %d.%d руб
-	Пожелания: '%s'
-	Дата заказа: %s`
+	var builder strings.Builder
+
+	fmt.Fprintf(&builder, "<b>Заказ №%s</b>\n\n", html.EscapeString(order.Id))
+	builder.WriteString("<b>Состав заказа:</b>\n")
 
 	itemsByRestaurant := make(map[string][]entity.OrderItem, len(order.Items))
 	for _, item := range order.Items {
 		itemsByRestaurant[item.RestaurantName] = append(itemsByRestaurant[item.RestaurantName], item)
 	}
 
-	dishTableHeader := `
-	|id|название блюда|количество в заказе|
-	|:-|:-|:-:|`
-	infoStr := make([]string, 0, len(order.Items)+len(itemsByRestaurant))
 	for restName, items := range itemsByRestaurant {
-		infoStr = append(infoStr, fmt.Sprintf("Название ресторана '%s':", restName), dishTableHeader)
+		builder.WriteString(fmt.Sprintf("<u>Ресторан: %s</u>\n", html.EscapeString(restName)))
+		builder.WriteString("<code>ID   Название                     Кол-во</code>\n")
+		builder.WriteString("<code>---  --------------------------  ------</code>\n")
 		for _, item := range items {
-			dishInfoStr := fmt.Sprintf("|%d|%s|%d|", item.DishId, item.Name, item.Count)
-			infoStr = append(infoStr, dishInfoStr)
+			name := html.EscapeString(item.Name)
+			if len(name) > 24 {
+				name = name[:21] + "..."
+			}
+			line := fmt.Sprintf("<code>%-4d %-26s %6d</code>\n", item.DishId, name, item.Count)
+			builder.WriteString(line)
 		}
-		infoStr = append(infoStr, "\n")
+		builder.WriteString("\n")
 	}
 
-	orderInfoStr := fmt.Sprintf(template,
-		order.Id, strings.Join(infoStr, "\n"),
-		user.Name,
-		user.Username,
-		order.Total/100, // nolint:mnd
-		order.Total%100, // nolint:mnd
-		order.Wishes,
-		order.CreatedAt.Local().Format(time.DateTime), // nolint:gosmopolitan
-	)
+	fmt.Fprintf(&builder, "<b>Имя заказавшего:</b> %s\n", html.EscapeString(user.Name))
+	fmt.Fprintf(&builder, "<b>Telegram ник:</b> @%s\n", html.EscapeString(user.Username))
+	fmt.Fprintf(&builder, "<b>Стоимость:</b> %d.%02d руб\n", order.Total/100, order.Total%100)
+	fmt.Fprintf(&builder, "<b>Пожелания:</b> '%s'\n", html.EscapeString(order.Wishes))
+	fmt.Fprintf(&builder, "<b>Дата:</b> %s", html.EscapeString(order.CreatedAt.Local().Format(time.DateTime)))
 
-	orderInfoStr = strings.ReplaceAll(orderInfoStr, "-", "\\-")
-	orderInfoStr = strings.ReplaceAll(orderInfoStr, "_", "\\_")
-	orderInfoStr = strings.ReplaceAll(orderInfoStr, "*", "\\*")
-	orderInfoStr = strings.ReplaceAll(orderInfoStr, "[", "\\[")
-	orderInfoStr = strings.ReplaceAll(orderInfoStr, "]", "\\]")
-	return orderInfoStr
+	return builder.String()
 }
